@@ -10,6 +10,20 @@ class KeyStream:
         return self.rand() % 256
 
 
-key = KeyStream()
-for i in range(10):
-    print(key.get_key_byte())
+def encrypt(key, message):
+    return bytes([message[i] ^ key.get_key_byte() for i in range(len(message))])
+
+
+key = KeyStream(10)
+# for i in range(10):
+#     print(key.get_key_byte())
+
+# encrypt message
+message = "Hello, World!".encode()
+cipher = encrypt(key, message)
+print(cipher)
+
+# decrypt message using KeyStream
+key = KeyStream(10)
+message = encrypt(key, cipher)
+print(message)
