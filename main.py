@@ -15,6 +15,7 @@ class KeyStream:
 def encrypt(key, message):
     return bytes([message[i] ^ key.get_key_byte() for i in range(len(message))])
 
+
 # function to demonstrate bits lost in transmit
 def transmit(cipher, likely):
     b = []
@@ -25,9 +26,18 @@ def transmit(cipher, likely):
     return bytes(b)
 
 
-key = KeyStream(10)
+# used to demonstrate ability to modify message cross transmission
+def modification(cipher):
+    mod = [0]*len(cipher)
+    mod[10] = ord(' ') ^ ord('1')
+    mod[11] = ord(' ') ^ ord('0')
+    mod[12] = ord('1') ^ ord('0')
+    return bytes([mod[i] ^ cipher[i] for i in range(len(cipher))])
+
+# key = KeyStream(10)
 # for i in range(10):
 #     print(key.get_key_byte())
+
 
 # encrypt message
 message = "Hello, World! This is a test for demonstration purposes.".encode()
@@ -42,3 +52,22 @@ cipher = transmit(cipher, 5)
 key = KeyStream(10)
 message = encrypt(key, cipher)
 print(message)
+
+# code to demonstrate ability to modify message cross transmission:
+
+# this is alice
+key = KeyStream(10)
+message = "Send Bob:   10$".encode()
+print(message)
+cipher = encrypt(key, message)
+print(cipher)
+
+# This is bob
+cipher = modification(cipher)
+print(cipher)
+
+# This is the Bank
+key = KeyStream(10)
+message = encrypt(key, cipher)
+print(message)
+
