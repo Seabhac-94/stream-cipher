@@ -34,10 +34,19 @@ def modification(cipher):
     mod[12] = ord('1') ^ ord('0')
     return bytes([mod[i] ^ cipher[i] for i in range(len(cipher))])
 
-# key = KeyStream(10)
+
+def get_key(message, cipher):
+    return bytes([message[i] ^ cipher[i] for i in range(len(cipher))])
+
+
+def crack(key_stream, cipher):
+    length = min(len(key_stream), len(cipher))
+    return bytes([key_stream[i] ^ cipher[i] for i in range(length)])
+
+
+key = KeyStream(10)
 # for i in range(10):
 #     print(key.get_key_byte())
-
 
 # encrypt message
 message = "Hello, World! This is a test for demonstration purposes.".encode()
@@ -64,10 +73,44 @@ print(cipher)
 
 # This is bob
 cipher = modification(cipher)
-print(cipher)
 
 # This is the Bank
 key = KeyStream(10)
 message = encrypt(key, cipher)
 print(message)
 
+
+# demonstrating the issue of re-using keys
+
+# Eve gives Alice 'fake' message
+eves_message = "This is the most important secret etc.".encode()
+
+# Alice unknowingly sends Bob 'fake' message
+key = KeyStream(10)
+message = eves_message
+print(message)
+cipher = encrypt(key,message)
+print(cipher)
+
+# Eve intercepts
+eves_key_stream = get_key(eves_message, cipher)
+
+# Bob receives message
+key = KeyStream(10)
+message = encrypt(key, cipher)
+print(message)
+
+# Alice sends another message
+message = "Another message sent to Bob".encode()
+key = KeyStream(10)
+cipher = encrypt(key, message)
+print(cipher)
+
+# Bob receives
+key = KeyStream(10)
+message = encrypt(key, cipher)
+print(message)
+
+# Eve intercepts message
+print("Eve decrypting message")
+print(crack(eves_key_stream, cipher))
