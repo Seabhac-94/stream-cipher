@@ -9,7 +9,7 @@ class KeyStream:
         return self.next
 
     def get_key_byte(self):
-        return self.rand() % 256
+        return (self.rand()//2**23) % 256
 
 
 def encrypt(key, message):
@@ -44,4 +44,14 @@ def crack(key_stream, cipher):
     return bytes([key_stream[i] ^ cipher[i] for i in range(length)])
 
 
+def brute_force(plain, cipher):
+    for k in range(2**31):
+        bf_key = KeyStream(k)
+        for i in range(len(plain)):
+            xor_value = plain[i] ^ cipher[i]
+            if xor_value != bf_key.get_key_byte():
+                break
+        else:
+            return k
+    return False
 
